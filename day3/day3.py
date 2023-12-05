@@ -21,6 +21,27 @@ def part1(filename):
                 res += check_if_valid(grid, row_idx, col_idx, curr_num)
     return res
 
+def part2(filename):
+    res = 0
+    grid = []
+    with open(filename) as file:
+        for line in file.readlines():
+            grid.append('#' + line[:-1] + '#')
+
+    # pad the boundaries with '#'s
+    grid.insert(0, '#' * len(grid[0]))
+    grid.append('#' * len(grid[0]))
+
+    for row_idx, row in enumerate(grid):
+        for col_idx, char in enumerate(row):
+            if row_idx == 0 or col_idx == 0 or row_idx == (len(grid) - 1) or col_idx == (len(grid[0]) - 1):
+                continue # skip padding
+            if char == '*':
+                product = check_gear(grid, row_idx, col_idx)
+                res += product
+
+    return res
+
 def check_if_valid(grid, row_idx, col_idx, num):
     # PROTECT THE BOUNDARIES
     top = True
@@ -51,35 +72,120 @@ def check_if_valid(grid, row_idx, col_idx, num):
 
     check_for_symbols = lambda x: x == '.'
 
-    if top: # verified
+    if top:
         top_symbols = grid[row_idx - 1][col_idx:(col_idx + len(num))]
         if not all(map(check_for_symbols, top_symbols)):
             return int(num)
-    if bottom: # verified
+    if bottom:
         bottom_symbols = grid[row_idx + 1][col_idx:(col_idx + len(num))]
         if not all(map(check_for_symbols, bottom_symbols)):
             return int(num)
-    if top_left: # verified
+    if top_left:
         if grid[row_idx - 1][col_idx - 1] != '.':
             return int(num)
-    if top_right: # verified
+    if top_right:
         if grid[row_idx - 1][col_idx + len(num)] != '.':
             return int(num)
-    if bottom_left: # verified
+    if bottom_left:
         if grid[row_idx + 1][col_idx - 1] != '.':
             return int(num)
-    if bottom_right: # verified
+    if bottom_right:
         if grid[row_idx + 1][col_idx + len(num)] != '.':
             return int(num)
-    if left: # verified
+    if left:
         if grid[row_idx][col_idx - 1] != '.':
             return int(num)
-    if right: # verified
+    if right:
         if grid[row_idx][col_idx + len(num)] != '.':
             return int(num)
-    # verified
     return 0  # this number is not adjacent to a symbol that isn't a '.'
 
+def check_gear(grid, row_idx, col_idx):
+    nums = []
+
+    top_left = grid[row_idx - 1][col_idx - 1]
+    top = grid[row_idx - 1][col_idx]
+    top_right = grid[row_idx - 1][col_idx + 1]
+    left = grid[row_idx][col_idx - 1]
+    right = grid[row_idx][col_idx + 1]
+    bottom_left = grid[row_idx + 1][col_idx - 1]
+    bottom = grid[row_idx + 1][col_idx]
+    bottom_right = grid[row_idx + 1][col_idx + 1]
+
+    if top.isdigit():
+        curr_num = top
+        curr_num = scan_left(grid, row_idx - 1, col_idx, curr_num)
+        curr_num = scan_right(grid, row_idx - 1, col_idx, curr_num)
+        nums.append(int(curr_num))
+    elif top_left.isdigit() and top_right.isdigit():
+        curr_num = top_left
+        curr_num = scan_left(grid, row_idx - 1, col_idx - 1, curr_num)
+        nums.append(int(curr_num))
+
+        curr_num = top_right
+        curr_num = scan_right(grid, row_idx - 1, col_idx + 1, curr_num)
+        nums.append(int(curr_num))
+    elif top_left.isdigit():
+        curr_num = top_left
+        curr_num = scan_left(grid, row_idx - 1, col_idx - 1, curr_num)
+        nums.append(int(curr_num))
+    elif top_right.isdigit():
+        curr_num = top_right
+        curr_num = scan_right(grid, row_idx - 1, col_idx + 1, curr_num)
+        nums.append(int(curr_num))
+
+    if bottom.isdigit():
+        curr_num = bottom
+        curr_num = scan_left(grid, row_idx + 1, col_idx, curr_num)
+        curr_num = scan_right(grid, row_idx + 1, col_idx, curr_num)
+        nums.append(int(curr_num))
+    elif bottom_left.isdigit() and bottom_right.isdigit():
+        curr_num = bottom_left
+        curr_num = scan_left(grid, row_idx + 1, col_idx - 1, curr_num)
+        nums.append(int(curr_num))
+
+        curr_num = bottom_right
+        curr_num = scan_right(grid, row_idx + 1, col_idx + 1, curr_num)
+        nums.append(int(curr_num))
+    elif bottom_left.isdigit():
+        curr_num = bottom_left
+        curr_num = scan_left(grid, row_idx + 1, col_idx - 1, curr_num)
+        nums.append(int(curr_num))
+    elif bottom_right.isdigit():
+        curr_num = bottom_right
+        curr_num = scan_right(grid, row_idx + 1, col_idx + 1, curr_num)
+        nums.append(int(curr_num))
+
+    if left.isdigit():
+        curr_num = left
+        curr_num = scan_left(grid, row_idx, col_idx - 1, curr_num)
+        nums.append(int(curr_num))
+    if right.isdigit():
+        curr_num = right
+        curr_num = scan_right(grid, row_idx, col_idx + 1, curr_num)
+        nums.append(int(curr_num))
+    if len(nums) == 2:
+        return nums[0] * nums[1]
+    return 0  # this gear doesn't have 2 numbers adjacent
+
+def scan_left(grid, row_idx, col_idx, curr_num):
+    curr_idx = col_idx - 1
+    curr_char = grid[row_idx][curr_idx]
+    while curr_char.isdigit():
+        curr_num = curr_char + curr_num
+        curr_idx -= 1
+        curr_char = grid[row_idx][curr_idx]
+    return curr_num
+
+def scan_right(grid, row_idx, col_idx, curr_num):
+    curr_idx = col_idx + 1
+    curr_char = grid[row_idx][curr_idx]
+    while curr_char.isdigit():
+        curr_num += curr_char
+        curr_idx += 1
+        curr_char = grid[row_idx][curr_idx]
+    return curr_num
 
 if __name__ == "__main__":
     print(part1("day3-input.txt"))
+    print(part2("day3-input.txt"))
