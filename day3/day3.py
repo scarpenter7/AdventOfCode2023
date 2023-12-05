@@ -112,49 +112,10 @@ def check_gear(grid, row_idx, col_idx):
     bottom = grid[row_idx + 1][col_idx]
     bottom_right = grid[row_idx + 1][col_idx + 1]
 
-    if top.isdigit():
-        curr_num = top
-        curr_num = scan_left(grid, row_idx - 1, col_idx, curr_num)
-        curr_num = scan_right(grid, row_idx - 1, col_idx, curr_num)
-        nums.append(int(curr_num))
-    elif top_left.isdigit() and top_right.isdigit():
-        curr_num = top_left
-        curr_num = scan_left(grid, row_idx - 1, col_idx - 1, curr_num)
-        nums.append(int(curr_num))
+    tops = scan_row(grid, row_idx - 1, col_idx, top, top_left, top_right)
+    bottoms = scan_row(grid, row_idx + 1, col_idx, bottom, bottom_left, bottom_right)
 
-        curr_num = top_right
-        curr_num = scan_right(grid, row_idx - 1, col_idx + 1, curr_num)
-        nums.append(int(curr_num))
-    elif top_left.isdigit():
-        curr_num = top_left
-        curr_num = scan_left(grid, row_idx - 1, col_idx - 1, curr_num)
-        nums.append(int(curr_num))
-    elif top_right.isdigit():
-        curr_num = top_right
-        curr_num = scan_right(grid, row_idx - 1, col_idx + 1, curr_num)
-        nums.append(int(curr_num))
-
-    if bottom.isdigit():
-        curr_num = bottom
-        curr_num = scan_left(grid, row_idx + 1, col_idx, curr_num)
-        curr_num = scan_right(grid, row_idx + 1, col_idx, curr_num)
-        nums.append(int(curr_num))
-    elif bottom_left.isdigit() and bottom_right.isdigit():
-        curr_num = bottom_left
-        curr_num = scan_left(grid, row_idx + 1, col_idx - 1, curr_num)
-        nums.append(int(curr_num))
-
-        curr_num = bottom_right
-        curr_num = scan_right(grid, row_idx + 1, col_idx + 1, curr_num)
-        nums.append(int(curr_num))
-    elif bottom_left.isdigit():
-        curr_num = bottom_left
-        curr_num = scan_left(grid, row_idx + 1, col_idx - 1, curr_num)
-        nums.append(int(curr_num))
-    elif bottom_right.isdigit():
-        curr_num = bottom_right
-        curr_num = scan_right(grid, row_idx + 1, col_idx + 1, curr_num)
-        nums.append(int(curr_num))
+    nums += tops + bottoms
 
     if left.isdigit():
         curr_num = left
@@ -164,9 +125,35 @@ def check_gear(grid, row_idx, col_idx):
         curr_num = right
         curr_num = scan_right(grid, row_idx, col_idx + 1, curr_num)
         nums.append(int(curr_num))
+
     if len(nums) == 2:
         return nums[0] * nums[1]
     return 0  # this gear doesn't have 2 numbers adjacent
+
+def scan_row(grid, row_idx, col_idx, middle, left, right):
+    nums = []
+    if middle.isdigit():
+        curr_num = middle
+        curr_num = scan_left(grid, row_idx, col_idx, curr_num)
+        curr_num = scan_right(grid, row_idx, col_idx, curr_num)
+        nums.append(int(curr_num))
+    elif left.isdigit() and right.isdigit():
+        curr_num = left
+        curr_num = scan_left(grid, row_idx, col_idx - 1, curr_num)
+        nums.append(int(curr_num))
+
+        curr_num = right
+        curr_num = scan_right(grid, row_idx, col_idx + 1, curr_num)
+        nums.append(int(curr_num))
+    elif left.isdigit():
+        curr_num = left
+        curr_num = scan_left(grid, row_idx, col_idx - 1, curr_num)
+        nums.append(int(curr_num))
+    elif right.isdigit():
+        curr_num = right
+        curr_num = scan_right(grid, row_idx, col_idx + 1, curr_num)
+        nums.append(int(curr_num))
+    return nums
 
 def scan_left(grid, row_idx, col_idx, curr_num):
     curr_idx = col_idx - 1
