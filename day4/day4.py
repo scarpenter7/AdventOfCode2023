@@ -31,7 +31,7 @@ def part2(filename):
             cards_dict[card_num] = intersection_len
 
         # Then count the copies using the pre-computed scores
-        for card_num in range(len(lines)):
+        for card_num in cards_dict.keys():
             score = cards_dict[card_num]
             for card in range(card_num + 1, card_num + score + 1):
                 res_dict[card] += res_dict[card_num]
