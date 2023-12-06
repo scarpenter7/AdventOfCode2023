@@ -68,7 +68,8 @@ func part2(filename string) int {
 
 	//testConvertSeed(all_sets)
 	//testConvertSeedOnce(all_sets)
-	testConvertSeedTxtFile(all_sets)
+	//testConvertSeedTxtFile(all_sets)
+
 	var wg sync.WaitGroup
 	total := 0
 	for i, seed_start := range seed_starts {
