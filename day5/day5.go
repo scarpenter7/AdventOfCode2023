@@ -22,7 +22,6 @@ func part2(filename string) int {
 
 	linenum := 0
 	skiplines := 0
-	var maps_list []func(int) int
 	var all_sets [][][]int
 	var curr_set [][]int
 	var seed_starts []int
@@ -53,8 +52,6 @@ func part2(filename string) int {
 		}
 		if line == "" {
 			all_sets = append(all_sets, curr_set)
-			mymap := buildMap(all_sets[sets_idx])
-			maps_list = append(maps_list, mymap)
 			curr_set = nil
 			sets_idx++
 			skiplines++
@@ -68,8 +65,10 @@ func part2(filename string) int {
 			curr_set = append(curr_set, numRow)
 		}
 	}
-	//fmt.Println("Test 2")
-	//testAll(maps_list)
+
+	//testConvertSeed(all_sets)
+	//testConvertSeedOnce(all_sets)
+	testConvertSeedTxtFile(all_sets)
 	var wg sync.WaitGroup
 	total := 0
 	for i, seed_start := range seed_starts {
@@ -78,7 +77,7 @@ func part2(filename string) int {
 			total++
 			go func(num int) {
 				defer wg.Done()
-				location := convertSeed(num, maps_list)
+				location := convertSeed(num, all_sets)
 				resContainer.compareMinRes(location)
 			}(seed)
 			if total%10000000 == 0 {
@@ -91,19 +90,16 @@ func part2(filename string) int {
 	return resContainer.res
 }
 
-func buildMap(currSet [][]int) func(int) int {
-	set_ptr := &currSet
-	return func(num int) int {
-		for _, tuple := range *set_ptr {
-			destination_start := tuple[0]
-			source_start := tuple[1]
-			range_len := tuple[2]
-			if num >= source_start && num < (source_start+range_len) {
-				return destination_start + num - source_start
-			}
+func mapfunc(num int, currSet [][]int) int {
+	for _, tuple := range currSet {
+		destination_start := tuple[0]
+		source_start := tuple[1]
+		range_len := tuple[2]
+		if num >= source_start && num < (source_start+range_len) {
+			return destination_start + num - source_start
 		}
-		return num
 	}
+	return num
 }
 
 func testAll(maps_list []func(int) int) {
@@ -116,6 +112,44 @@ func testAll(maps_list []func(int) int) {
 	fmt.Println(maps_list[6](46))
 }
 
+func testConvertSeed(all_sets [][][]int) {
+	fmt.Println(all_sets)
+	fmt.Println(convertSeed(79, all_sets) == 82)
+	fmt.Println(convertSeed(14, all_sets) == 43)
+	fmt.Println(convertSeed(55, all_sets) == 86)
+	fmt.Println(convertSeed(13, all_sets) == 35)
+	fmt.Println(convertSeed(82, all_sets) == 46)
+}
+
+func testConvertSeedOnce(all_sets [][][]int) {
+	fmt.Println(mapfunc(79, all_sets[0]) == 81)
+	fmt.Println(mapfunc(14, all_sets[0]) == 14)
+	fmt.Println(mapfunc(55, all_sets[0]) == 57)
+	fmt.Println(mapfunc(13, all_sets[0]) == 13)
+}
+
+func testConvertSeedTxtFile(all_sets [][][]int) {
+	file, _ := os.Open("part1-tests.txt")
+	defer file.Close()
+	fileScanner := bufio.NewScanner(file)
+
+	fileScanner.Split(bufio.ScanLines)
+
+	for fileScanner.Scan() {
+		line := fileScanner.Text()
+		if line == "" {
+			break
+		}
+		nums_strs := strings.Fields(line)
+		seed, _ := strconv.Atoi(nums_strs[0])
+		location, _ := strconv.Atoi(nums_strs[1])
+		res := convertSeed(seed, all_sets)
+		fmt.Println(seed, location, res)
+		fmt.Println(res == location)
+		fmt.Println()
+	}
+}
+
 func makeRange(min, max int) []int {
 	a := make([]int, max-min)
 	for i := range a {
@@ -124,10 +158,10 @@ func makeRange(min, max int) []int {
 	return a
 }
 
-func convertSeed(seed int, mapList []func(int) int) int {
+func convertSeed(seed int, all_sets [][][]int) int {
 	res := seed
-	for _, mapfunc := range mapList {
-		res = mapfunc(res)
+	for _, set := range all_sets {
+		res = mapfunc(res, set)
 	}
 	return res
 }
@@ -148,6 +182,6 @@ func (c *Container) compareMinRes(num int) {
 
 func main() {
 	fmt.Println("hello!")
-	fmt.Println(part2("test.txt"))
+	fmt.Println(part2("day5-input.txt"))
 	fmt.Println("finished.")
 }

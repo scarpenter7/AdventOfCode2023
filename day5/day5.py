@@ -23,10 +23,12 @@ def part1(filename):
         mymap = buildMap(curr_set)
         maps_list.append(mymap)
         # convert each seed
-        for seed in seeds:
-            location = convertSeed(seed, maps_list)
-            if res is None or location < res:
-                res = location
+        with open('part1-tests.txt', 'w') as f:
+            for seed in seeds:
+                location = convertSeed(seed, maps_list)
+                f.writelines(str(seed) + " " + str(location) + '\n')
+                if res is None or location < res:
+                    res = location
     return res
 
 def part2(filename):
