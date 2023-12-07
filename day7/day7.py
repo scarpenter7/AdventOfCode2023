@@ -9,6 +9,8 @@ class Hand:
         self.hand_str = hand_str 
         self.wild_Js = wild_Js # boolean
         self.hand_dict = {}
+        self.build_hand_dict()
+        self.hand_type = self.classify_hand_type()
         if wild_Js:
             self.card_rank = card_rank_J
         else:
@@ -25,10 +27,9 @@ class Hand:
     def __lt__(self, other):
         if not self._is_valid_operand(other):
             return NotImplemented
-        self_hand_type = self.classify_hand_type()
-        other_hand_type = other.classify_hand_type()
-        if self_hand_type != other_hand_type:
-            return self_hand_type < other_hand_type
+        
+        if self.hand_type != other.hand_type:
+            return self.hand_type < other.hand_type
 
         # same hand type
         for self_char, other_char in zip(self.hand_str, other.hand_str):
@@ -37,8 +38,6 @@ class Hand:
         return False  # equal
 
     def classify_hand_type(self):
-        self.build_hand_dict()
-
         if len(self.hand_dict.keys()) == 1:
             return 7  # 5 of a kind
         if len(self.hand_dict.keys()) == 5:
@@ -60,10 +59,7 @@ class Hand:
             return 3
         return -1  # ERROR
 
-
     def build_hand_dict(self):
-        if self.hand_dict != {}:
-            return
         for char in self.hand_str:
             if char not in self.hand_dict.keys():
                 self.hand_dict[char] = 1
