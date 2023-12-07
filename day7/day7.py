@@ -5,8 +5,14 @@ card_rank_J = {"2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "
 
 @functools.total_ordering
 class Hand:
-    def __init__(self, hand_str):
-        self.hand_str = hand_str
+    def __init__(self, hand_str, wild_Js):
+        self.hand_str = hand_str 
+        self.wild_Js = wild_Js # boolean
+        self.hand_dict = {}
+        if wild_Js:
+            self.card_rank = card_rank_J
+        else:
+            self.card_rank = card_rank
 
     def _is_valid_operand(self, other):
         return (hasattr(other, "hand_str"))
@@ -21,35 +27,34 @@ class Hand:
             return NotImplemented
         self_hand_type = self.classify_hand_type()
         other_hand_type = other.classify_hand_type()
-        if self_hand_type < other_hand_type:
-            return True
-        elif self_hand_type > other_hand_type:
-            return False
+        if self_hand_type != other_hand_type:
+            return self_hand_type < other_hand_type
 
         # same hand type
         for self_char, other_char in zip(self.hand_str, other.hand_str):
             if self_char != other_char:
-                return card_rank[self_char] < card_rank[other_char]
+                return self.card_rank[self_char] < self.card_rank[other_char]
         return False  # equal
 
     def classify_hand_type(self):
-        hand_dict = self.build_hand_dict()
-        if len(hand_dict.keys()) == 1:
+        self.build_hand_dict()
+
+        if len(self.hand_dict.keys()) == 1:
             return 7  # 5 of a kind
-        if len(hand_dict.keys()) == 5:
+        if len(self.hand_dict.keys()) == 5:
             return 1  # high card
-        if len(hand_dict.keys()) == 4:
+        if len(self.hand_dict.keys()) == 4:
             return 2  # one pair
-        if len(hand_dict.keys()) == 2:
+        if len(self.hand_dict.keys()) == 2:
             # either 4 of a kind OR full house
-            for key, val in hand_dict.items():
+            for key, val in self.hand_dict.items():
                 if val == 4 or val == 1:
                     return 6  # 4 of a kind
                 else:
                     return 5  # full house
-        if len(hand_dict.keys()) == 3:
+        if len(self.hand_dict.keys()) == 3:
             # either 2 pair of 3 of a kind
-            for key, val in hand_dict.items():
+            for key, val in self.hand_dict.items():
                 if val == 3:
                     return 4  # 3 of a kind
             return 3
@@ -57,20 +62,44 @@ class Hand:
 
 
     def build_hand_dict(self):
-        res = {}
+        if self.hand_dict != {}:
+            return
         for char in self.hand_str:
-            if char not in res.keys():
-                res[char] = 1
+            if char not in self.hand_dict.keys():
+                self.hand_dict[char] = 1
             else:
-                res[char] += 1
-        return res
+                self.hand_dict[char] += 1
+        if self.wild_Js:
+            self.optimize_hand()
+    
+    def optimize_hand(self):
+        if 'J' not in self.hand_dict.keys():
+            return
+        numJs = self.hand_dict['J']
+        if numJs == 5:
+            return
+        del self.hand_dict['J']
+        
+        highest_cardinality_card = max(self.hand_dict, key=self.hand_dict.get)
+        self.hand_dict[highest_cardinality_card] += numJs
+
 
 def part1(filename):
     res = 0
     with open(filename) as file:
         lines = file.readlines()
         hands_bids_dict = {l.split()[0] : int(l.split()[1]) for l in lines}
-        hand_objs_list = sorted([Hand(s) for s in hands_bids_dict.keys()])
+        hand_objs_list = sorted([Hand(s, False) for s in hands_bids_dict.keys()])
+        for i, hand in enumerate(hand_objs_list):
+            res += (i + 1) * hands_bids_dict[hand.hand_str]
+    return res
+
+def part2(filename):
+    res = 0
+    with open(filename) as file:
+        lines = file.readlines()
+        hands_bids_dict = {l.split()[0] : int(l.split()[1]) for l in lines}
+        hand_objs_list = sorted([Hand(s, True) for s in hands_bids_dict.keys()])
         for i, hand in enumerate(hand_objs_list):
             multiplier = i + 1
             res += multiplier * hands_bids_dict[hand.hand_str]
@@ -78,4 +107,4 @@ def part1(filename):
 
 if __name__ == "__main__":
     print(part1("day7-input.txt"))
-    #print(part2("test.txt"))
+    print(part2("day7-input.txt"))
