@@ -82,7 +82,6 @@ class Hand:
 
 
 def part1(filename):
-    res = 0
     with open(filename) as file:
         lines = file.readlines()
         hand_objs_list = sorted([Hand(l.split()[0], int(l.split()[1]), False) for l in lines])
