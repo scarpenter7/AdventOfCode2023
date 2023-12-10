@@ -17,18 +17,7 @@ class Hand:
         else:
             self.card_rank = card_rank
 
-    def _is_valid_operand(self, other):
-        return (hasattr(other, "hand_str"))
-
-    def __eq__(self, other):
-        if not self._is_valid_operand(other):
-            return NotImplemented
-        return (self.hand_str == other.hand_str)
-
     def __lt__(self, other):
-        if not self._is_valid_operand(other):
-            return NotImplemented
-        
         if self.hand_type != other.hand_type:
             return self.hand_type < other.hand_type
 
