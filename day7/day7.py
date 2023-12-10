@@ -5,9 +5,10 @@ card_rank_J = {"2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "
 
 @functools.total_ordering
 class Hand:
-    def __init__(self, hand_str, wild_Js):
+    def __init__(self, hand_str, bid, wild_Js):
+        self.bid = bid
         self.hand_str = hand_str 
-        self.wild_Js = wild_Js # boolean
+        self.wild_Js = wild_Js  # boolean
         self.hand_dict = {}
         self.build_hand_dict()
         self.hand_type = self.classify_hand_type()
@@ -84,22 +85,14 @@ def part1(filename):
     res = 0
     with open(filename) as file:
         lines = file.readlines()
-        hands_bids_dict = {l.split()[0] : int(l.split()[1]) for l in lines}
-        hand_objs_list = sorted([Hand(s, False) for s in hands_bids_dict.keys()])
-        for i, hand in enumerate(hand_objs_list):
-            res += (i + 1) * hands_bids_dict[hand.hand_str]
-    return res
+        hand_objs_list = sorted([Hand(l.split()[0], int(l.split()[1]), False) for l in lines])
+    return sum([(i + 1) * hand.bid for i, hand in enumerate(hand_objs_list)])
 
 def part2(filename):
-    res = 0
     with open(filename) as file:
         lines = file.readlines()
-        hands_bids_dict = {l.split()[0] : int(l.split()[1]) for l in lines}
-        hand_objs_list = sorted([Hand(s, True) for s in hands_bids_dict.keys()])
-        for i, hand in enumerate(hand_objs_list):
-            multiplier = i + 1
-            res += multiplier * hands_bids_dict[hand.hand_str]
-    return res
+        hand_objs_list = sorted([Hand(l.split()[0], int(l.split()[1]), True) for l in lines])
+    return sum([(i + 1) * hand.bid for i, hand in enumerate(hand_objs_list)])
 
 if __name__ == "__main__":
     print(part1("day7-input.txt"))
