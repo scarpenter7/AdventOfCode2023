@@ -25,10 +25,12 @@ def part1(filename):
         lines = file.readlines()
     return sum(process_line(line) for line in lines)
 
+
 def part2(filename):
     with open(filename) as file:
         lines = file.readlines()
     return sum(process_line(line, False) for line in lines)
+
 
 if __name__ == "__main__":
     print(part1("day9-input.txt"))
